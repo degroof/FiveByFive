@@ -1,0 +1,366 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 100%;
+    padding: 30px 20px;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header-content h1 {
+    font-size: 32px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.game-info {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+#gameNumber {
+    font-weight: bold;
+    color: #667eea;
+}
+
+/* Instructions */
+.instructions-section {
+    margin-bottom: 20px;
+}
+
+.instructions-toggle {
+    background: #f0f0f0;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.instructions-toggle:hover {
+    background: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+.instructions-content {
+    background: #f9f9f9;
+    border-left: 4px solid #667eea;
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.instructions-content p {
+    margin-bottom: 10px;
+}
+
+.instructions-content ul {
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+.instructions-content li {
+    margin-bottom: 5px;
+}
+
+/* Game Board Container */
+.game-board-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+/* Grid */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    background: #ddd;
+    padding: 4px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 100%;
+    aspect-ratio: 1;
+}
+
+.grid-square {
+    aspect-ratio: 1;
+    border: 2px solid #000;
+    cursor: grab;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background: white;
+    border-radius: 4px;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.grid-square.black {
+    background: #000;
+    cursor: default;
+}
+
+.grid-square.white {
+    background: white;
+}
+
+.grid-square.white:hover {
+    background: #f5f5f5;
+}
+
+.grid-square.white.drag-over {
+    background: #e8f0ff;
+    box-shadow: inset 0 0 0 2px #667eea;
+}
+
+.grid-square.white.drag-over:active {
+    background: #d0e0ff;
+}
+
+/* Tiles */
+.tile {
+    width: 90%;
+    height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: grab;
+    user-select: none;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.tile:active {
+    cursor: grabbing;
+}
+
+.tile.black-on-white {
+    background: white;
+    color: black;
+    border: 1px solid #ccc;
+}
+
+.tile.white-on-red {
+    background: #ff4444;
+    color: white;
+}
+
+.tile.white-on-green {
+    background: #44dd44;
+    color: white;
+}
+
+/* Tile Rack */
+.tile-rack {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 20px;
+}
+
+.tile-rack-slot {
+    aspect-ratio: 1;
+    background: #f0f0f0;
+    border: 2px dashed #ccc;
+    border-radius: 6px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tile-rack-slot.centered {
+    grid-column: 3 / 4;
+    margin-top: 10px;
+}
+
+.tile-rack-slot .tile {
+    width: 100%;
+    height: 100%;
+}
+
+/* Button Bar */
+.button-bar {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.game-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+#giveUpBtn {
+    background: #ff6b6b;
+    color: white;
+}
+
+#giveUpBtn:hover {
+    background: #ff5252;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+#peekBtn {
+    background: #4ecdc4;
+    color: white;
+}
+
+#peekBtn:hover {
+    background: #45b8b0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+}
+
+#shareBtn {
+    background: #667eea;
+    color: white;
+}
+
+#shareBtn:hover {
+    background: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.game-button:active {
+    transform: translateY(0);
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px 15px;
+    }
+
+    .header-content h1 {
+        font-size: 24px;
+    }
+
+    .game-info {
+        font-size: 16px;
+    }
+
+    .grid,
+    .tile-rack {
+        max-width: 100%;
+    }
+
+    .grid-square {
+        min-height: 60px;
+    }
+
+    .tile {
+        font-size: 18px;
+    }
+
+    .game-button {
+        padding: 10px 20px;
+        font-size: 14px;
+        min-width: 100px;
+    }
+
+    .button-bar {
+        gap: 8px;
+    }
+}
+
+@media (max-width: 400px) {
+    .container {
+        padding: 15px 10px;
+    }
+
+    .header-content h1 {
+        font-size: 20px;
+    }
+
+    .game-info {
+        font-size: 14px;
+    }
+
+    .grid {
+        gap: 3px;
+        padding: 3px;
+    }
+
+    .grid-square {
+        min-height: 50px;
+        border-width: 1px;
+    }
+
+    .tile {
+        font-size: 16px;
+    }
+
+    .tile-rack {
+        gap: 6px;
+    }
+
+    .tile-rack-slot {
+        border-width: 1px;
+    }
+
+    .game-button {
+        padding: 8px 16px;
+        font-size: 12px;
+        min-width: 90px;
+    }
+}
+
+/* Touch-friendly adjustments */
+@media (hover: none) and (pointer: coarse) {
+    .game-button:active {
+        transform: scale(0.98);
+    }
+
+    .tile {
+        width: 100%;
+        height: 100%;
+    }
+}
