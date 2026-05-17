@@ -1,0 +1,49 @@
+// Sample grid data - each entry is an array of 7 strings:
+// [row0Word, row2Word, row4Word, col0Word, col2Word, col4Word, tileLetters]
+const grids = [
+    [
+        "HEART",
+        "LEMON",
+        "NAILS",
+        "HELLO",
+        "ANGER",
+        "TASKS",
+        "HEARTLEMONAILSHELLOANGERTASKSX"
+    ],
+    [
+        "BREAD",
+        "METAL",
+        "SIGHT",
+        "BEATS",
+        "MEDIA",
+        "LIGHT",
+        "BREADMETALSIGHTBEATSMEDIALLGHT"
+    ],
+    [
+        "PLANT",
+        "QUICK",
+        "WORDS",
+        "PRUNE",
+        "LICKS",
+        "STAND",
+        "PLANTQUICKWORDSPRUNELICKSSTAND"
+    ],
+    [
+        "STONE",
+        "FUNNY",
+        "LAKES",
+        "SHOUT",
+        "OFTEN",
+        "NEARS",
+        "STONEFUNNYLAKESSHOUTOFTENNEARS"
+    ],
+    [
+        "MUSIC",
+        "BROWN",
+        "LIGHT",
+        "MURAL",
+        "SWING",
+        "CHIEF",
+        "MUSICBROWNLIGHTMURALSWINGCHIEF"
+    ]
+];
