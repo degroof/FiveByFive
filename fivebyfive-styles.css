@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: gray;
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -23,7 +23,6 @@ body {
     padding: 30px 20px;
 }
 
-/* Header */
 .header {
     text-align: center;
     margin-bottom: 30px;
@@ -43,10 +42,9 @@ body {
 
 #gameNumber {
     font-weight: bold;
-    color: #667eea;
+    color: #000000;
 }
 
-/* Instructions */
 .instructions-section {
     margin-bottom: 20px;
 }
@@ -93,7 +91,6 @@ body {
     margin-bottom: 5px;
 }
 
-/* Game Board Container */
 .game-board-container {
     display: flex;
     flex-direction: column;
@@ -101,7 +98,6 @@ body {
     align-items: center;
 }
 
-/* Grid */
 .grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -117,7 +113,6 @@ body {
 .grid-square {
     aspect-ratio: 1;
     border: 2px solid #000;
-    cursor: grab;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -150,7 +145,12 @@ body {
     background: #d0e0ff;
 }
 
-/* Tiles */
+.game-board-container.drag-over {
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 8px;
+    outline: 2px dashed #667eea;
+}
+
 .tile {
     width: 90%;
     height: 90%;
@@ -185,13 +185,12 @@ body {
     color: white;
 }
 
-/* Tile Rack */
 .tile-rack {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     gap: 8px;
     width: 100%;
-    max-width: 400px;
+    max-width: 600px;
     margin-top: 20px;
 }
 
@@ -216,7 +215,6 @@ body {
     height: 100%;
 }
 
-/* Button Bar */
 .button-bar {
     display: flex;
     gap: 12px;
@@ -237,34 +235,45 @@ body {
 }
 
 #giveUpBtn {
-    background: #ff6b6b;
+    background: #6b6bff;
     color: white;
 }
 
 #giveUpBtn:hover {
-    background: #ff5252;
+    background: #5252ff;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
 }
 
-#peekBtn {
-    background: #4ecdc4;
+#checkBtn {
+    background: #6b6bff;
     color: white;
 }
 
-#peekBtn:hover {
-    background: #45b8b0;
+#checkBtn:hover {
+    background: #5252ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+}
+
+#hintBtn {
+    background: #6b6bff;
+    color: white;
+}
+
+#hintBtn:hover {
+    background: #5252ff;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
 }
 
 #shareBtn {
-    background: #667eea;
+    background: #6b6bff;
     color: white;
 }
 
 #shareBtn:hover {
-    background: #5568d3;
+    background: #5252ff;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
@@ -364,3 +373,27 @@ body {
         height: 100%;
     }
 }
+
+/*toast message for sharing*/
+#toast {
+  visibility: hidden;
+  min-width: 250px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 5px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+}
+
+#toast.show {
+  visibility: visible;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+@keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
