@@ -57,7 +57,7 @@ body {
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
-    color: #333;
+    color: #000000;
     transition: all 0.3s ease;
     width: 100%;
 }
@@ -74,12 +74,13 @@ body {
     margin-top: 10px;
     border-radius: 4px;
     font-size: 14px;
-    color: #555;
+    color: #000000;
     line-height: 1.6;
+    text-align: left;
 }
 
 .instructions-content p {
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .instructions-content ul {

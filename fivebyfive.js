@@ -11,6 +11,8 @@ let wordsFound = 0;
 let elapsed = 0;
 let checkActive = false;
 let checkBackupState = {};
+let hintActive = false;
+let hintBackupState = {};
 let tilePositions = {};
 let squareColors = [];
 
@@ -485,7 +487,7 @@ function loadGameState() {
  */
 function updateButtonVisibility() {
     giveUpBtn.style.display = gameStatus === 'in progress' ? 'block' : 'none';
-    hintBtn.style.display = ['new', 'in progress'].includes(gameStatus) && (hints < 3) ? 'block' : 'none';
+    hintBtn.style.display = ['new', 'in progress'].includes(gameStatus) ? 'block' : 'none';
     checkBtn.style.display = ['win', 'resign'].includes(gameStatus) ? 'block' : 'none';
     shareBtn.style.display = ['win', 'resign'].includes(gameStatus) ? 'block' : 'none';
 }
@@ -543,6 +545,78 @@ function handleCheckMouseUp() {
     clearBoard();
     //restore backed up state
     boardState = checkBackupState;
+    restoreBoardState();
+
+    for(let i=0;i<25;i++)
+    {
+        if(squareColors[i]!='') setTileColor(i,squareColors[i]);
+    }
+}
+
+/**
+ * "hint" button pressed - show hints from expected solution
+ */
+function handleHintMouseDown() {
+    if (!['new', 'in progress'].includes(gameStatus)) return;
+
+    hintActive = true;
+    squareColors = [];
+    for(let i=0;i<25;i++)
+    {
+        squareColors.push(getTileColor(i));
+        setTileColor(i,'white');
+    }
+    //backup current board state
+    hintBackupState = JSON.parse(JSON.stringify(boardState));
+    clearBoard();
+
+    if(hints<3) hints++; //increment number of hints
+    let usedTiles=[]; //list of tiles already placed
+    let revealedSquares=[]; //list of squares to fill
+    boardState = {}; //reset board state
+
+    clearBoard();
+
+    if(hints>=1) revealedSquares.push(12); //center square
+    if(hints>=2)
+    {
+        revealedSquares.push(2); //middle square of each side
+        revealedSquares.push(10);
+        revealedSquares.push(14);
+        revealedSquares.push(22);
+    }
+    if(hints>=3)
+    {
+        revealedSquares.push(0); //corner squares
+        revealedSquares.push(4);
+        revealedSquares.push(20);
+        revealedSquares.push(24);
+    }
+    let letters = gameData[6]; //list of available letters
+    let rowText = gameData[0]+"     "+gameData[1]+"     "+gameData[2];
+
+    for(const square of revealedSquares)
+    {
+        let targetLetter = rowText[square];
+        //get next available matching tile
+        let index = letters.split('').findIndex((char, i) => char === targetLetter && !usedTiles.includes(i));
+        usedTiles.push(index); //add to list of already used
+        boardState[square]=index; //update board state
+    }
+
+    restoreBoardState();
+
+}
+
+/**
+ *"hint" button released - restore board state
+ */
+function handleHintMouseUp() {
+    if (!hintActive) return;
+    hintActive = false;
+    clearBoard();
+    //restore backed up state
+    boardState = hintBackupState;
     restoreBoardState();
 
     for(let i=0;i<25;i++)
@@ -715,13 +789,18 @@ function setupEventListeners() {
     });
     
     giveUpBtn.addEventListener('click', handleGiveUp);
-    hintBtn.addEventListener('click', handleHint);
     shareBtn.addEventListener('click', handleShare);
 
+    //"hint" button press/release
+    hintBtn.addEventListener('mousedown', handleHintMouseDown);
+    hintBtn.addEventListener('mouseup', handleHintMouseUp);
+    hintBtn.addEventListener('touchstart', handleHintMouseDown);
+    hintBtn.addEventListener('touchend', handleHintMouseUp);
+    
     //"check" button press/release
     checkBtn.addEventListener('mousedown', handleCheckMouseDown);
     checkBtn.addEventListener('mouseup', handleCheckMouseUp);
     checkBtn.addEventListener('touchstart', handleCheckMouseDown);
     checkBtn.addEventListener('touchend', handleCheckMouseUp);
-    
+
 }
