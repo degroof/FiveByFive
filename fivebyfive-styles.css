@@ -249,6 +249,9 @@ body {
 #checkBtn {
     background: #6b6bff;
     color: white;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 #checkBtn:hover {
@@ -260,6 +263,9 @@ body {
 #hintBtn {
     background: #6b6bff;
     color: white;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 #hintBtn:hover {

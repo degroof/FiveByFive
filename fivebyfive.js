@@ -519,7 +519,8 @@ function clearBoard()
 /**
  * "check" button pressed - show expected solution
  */
-function handleCheckMouseDown() {
+function handleCheckMouseDown(e) {
+    e.preventDefault();
     if (!['win', 'resign'].includes(gameStatus)) return;
     
     checkActive = true;
@@ -539,7 +540,8 @@ function handleCheckMouseDown() {
 /**
  *"check" button released - restore board state
  */
-function handleCheckMouseUp() {
+function handleCheckMouseUp(e) {
+    e.preventDefault();
     if (!checkActive) return;
     checkActive = false;
     clearBoard();
@@ -556,7 +558,8 @@ function handleCheckMouseUp() {
 /**
  * "hint" button pressed - show hints from expected solution
  */
-function handleHintMouseDown() {
+function handleHintMouseDown(e) {
+    e.preventDefault();
     if (!['new', 'in progress'].includes(gameStatus)) return;
 
     hintActive = true;
@@ -611,7 +614,8 @@ function handleHintMouseDown() {
 /**
  *"hint" button released - restore board state
  */
-function handleHintMouseUp() {
+function handleHintMouseUp(e) {
+    e.preventDefault();
     if (!hintActive) return;
     hintActive = false;
     clearBoard();
@@ -794,13 +798,13 @@ function setupEventListeners() {
     //"hint" button press/release
     hintBtn.addEventListener('mousedown', handleHintMouseDown);
     hintBtn.addEventListener('mouseup', handleHintMouseUp);
-    hintBtn.addEventListener('touchstart', handleHintMouseDown);
-    hintBtn.addEventListener('touchend', handleHintMouseUp);
+    hintBtn.addEventListener('touchstart', handleHintMouseDown, { passive: false });
+    hintBtn.addEventListener('touchend', handleHintMouseUp, { passive: false });
     
     //"check" button press/release
     checkBtn.addEventListener('mousedown', handleCheckMouseDown);
     checkBtn.addEventListener('mouseup', handleCheckMouseUp);
-    checkBtn.addEventListener('touchstart', handleCheckMouseDown);
-    checkBtn.addEventListener('touchend', handleCheckMouseUp);
+    checkBtn.addEventListener('touchstart', handleCheckMouseDown, { passive: false });
+    checkBtn.addEventListener('touchend', handleCheckMouseUp, { passive: false });
 
 }
