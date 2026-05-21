@@ -164,25 +164,37 @@ body {
     user-select: none;
     border-radius: 4px;
     transition: all 0.2s ease;
+    /* 3D Effect */
+    box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.25),           /* Drop shadow */
+        inset -1px -1px 3px rgba(0, 0, 0, 0.15), /* Bottom-right inner shadow */
+        inset 1px 1px 3px rgba(255, 255, 255, 0.5); /* Top-left inner highlight */
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transform: translateZ(0);
 }
 
 .tile:active {
     cursor: grabbing;
+
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.2),
+        inset -0.5px -0.5px 2px rgba(0, 0, 0, 0.1),
+        inset 0.5px 0.5px 2px rgba(255, 255, 255, 0.3);
+    transform: translateY(2px) translateZ(0);
 }
 
 .tile.black-on-white {
-    background: white;
+    background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
     color: black;
-    border: 1px solid #ccc;
 }
 
 .tile.white-on-red {
-    background: #ff4444;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff4444 100%);
     color: white;
 }
 
 .tile.white-on-green {
-    background: #44dd44;
+    background: linear-gradient(135deg, #66dd66 0%, #44dd44 100%);
     color: white;
 }
 
@@ -378,6 +390,16 @@ body {
     .tile {
         width: 100%;
         height: 100%;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .tile:hover {
+        box-shadow:
+            0 6px 12px rgba(0, 0, 0, 0.3),
+            inset -1px -1px 3px rgba(0, 0, 0, 0.15),
+            inset 1px 1px 3px rgba(255, 255, 255, 0.5);
+        transform: translateY(-1px) translateZ(0);
     }
 }
 
