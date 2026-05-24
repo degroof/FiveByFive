@@ -61,6 +61,13 @@ gameBoardContainer.addEventListener('drop', handleDropOnContainer);
 gameBoardContainer.addEventListener('dragleave', handleDragLeave);
 
 /**
+* Sleep for ms
+*/
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
  * Calculate game number based on days since start
  */
 function calculateGameNumber() {
@@ -262,7 +269,7 @@ function checkBoard() {
 /**
  * player wins
  */
-function win() {
+async function win() {
     gameStatus = 'win';
 
     //stop timer
@@ -272,6 +279,18 @@ function win() {
 
     saveGameState();
     updateButtonVisibility();
+    //flash 3 times
+    for(let f=0;f<3;f++)
+    {
+        for(let c=0;c<2;c++)
+        {
+            for(t=0;t<25;t++)
+            {
+                setTileColor(t,c==0?"white":"green");
+            }
+            await sleep(100);
+        }
+    }
 }
 
 /**
@@ -806,5 +825,9 @@ function setupEventListeners() {
     checkBtn.addEventListener('mouseup', handleCheckMouseUp);
     checkBtn.addEventListener('touchstart', handleCheckMouseDown, { passive: false });
     checkBtn.addEventListener('touchend', handleCheckMouseUp, { passive: false });
+
+    window.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+    });
 
 }
