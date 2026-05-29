@@ -77,7 +77,10 @@ body {
     color: #000000;
     line-height: 1.6;
     text-align: left;
-}
+
+    max-height: 16em;
+    overflow-y: auto;
+    overflow-x: hidden;}
 
 .instructions-content p {
     margin-bottom: 5px;
