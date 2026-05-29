@@ -71,6 +71,12 @@ function sleep(ms) {
  * Calculate game number based on days since start
  */
 function calculateGameNumber() {
+    let url = new URL(window.location);
+    let r = url.searchParams.get("random");
+    if(r==1)
+    {
+        return Math.floor(Math.random()*grids.length)+1;
+    }
     const baseDate = new Date('2026-05-18 00:00:00').getTime(); //must start at midnight
     const today = new Date().getTime();
     const daysDiff = Math.floor((today - baseDate) / (1000 * 60 * 60 * 24));
