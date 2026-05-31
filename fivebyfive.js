@@ -5,6 +5,7 @@ let boardState = {};
 let startTime = null;
 let timerInterval = null;
 let draggedTile = null;
+let touchTile = null;
 let hints = 0;
 let moves = 0;
 let wordsFound = 0;
@@ -143,10 +144,11 @@ function renderGrid() {
             square.classList.add('black');
         } else {
             square.classList.add('white');
-            //square.draggable = true;
             square.addEventListener('dragover', handleDragOver);
             square.addEventListener('drop', handleDrop);
             square.addEventListener('dragleave', handleDragLeave);
+            square.addEventListener('touchmove', handleDragOver);
+            square.addEventListener('touchend', handleDrop);
         }
         
         gameGrid.appendChild(square);
@@ -159,7 +161,15 @@ function renderGrid() {
 function renderTileRack() {
     tileRack.innerHTML = '';
     const tileLetters = gameData[6];
-    
+    //create a phantom tile for touch screens
+    touchTile = document.createElement('div');
+    touchTile.className = 'tile black-on-white';
+    touchTile.style.position = 'absolute';
+    touchTile.style.width = '40';
+    touchTile.style.height = '40';
+    touchTile.style.visibility = 'hidden';
+    touchTile.classList.add('no-transition');
+    document.getElementById('gameGrid').appendChild(touchTile);
     // Create 3 rows of 7 tiles
     for (let i = 0; i < 21; i++) {
         const slot = document.createElement('div');
@@ -176,7 +186,11 @@ function renderTileRack() {
         tile.dataset.tileIndex = i;
         tile.addEventListener('dragstart', handleDragStart);
         tile.addEventListener('dragend', handleDragEnd);
-        
+        //add listeners for touchscreens
+        tile.addEventListener('touchstart', handleDragStart, { passive: false });
+        tile.addEventListener('touchmove', handleTouchMove, { passive: false });
+        tile.addEventListener('touchend', handleTouchEnd, { passive: false });
+
         slot.appendChild(tile);
         tilePositions[i] = slot;
     }
@@ -300,7 +314,7 @@ async function win() {
 }
 
 /**
- * drag start
+ * drag start (mouse and touch)
  */
 function handleDragStart(e) {
     //only allow dragging if the game is playable
@@ -317,8 +331,31 @@ function handleDragStart(e) {
     }
     
     draggedTile = e.target;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', e.target.innerHTML);
+
+    if(e.touches && e.touches[0])
+    {
+        const touch = e.touches[0];
+        draggedTile.style.opacity = '0';
+        touchTile.style.visibility = 'visible';
+
+        // use phantom tile for dragging
+        const square = document.getElementById('square-0');
+        const computedStyle = window.getComputedStyle(square);
+        const width = Math.floor(parseFloat(computedStyle.width))-4;
+        const height = Math.floor(parseFloat(computedStyle.height))-4;
+        touchTile.style.position = 'fixed';
+        touchTile.style.left = ''+Math.floor(touch.clientX - width/2) + 'px';
+        touchTile.style.top = ''+Math.floor(touch.clientY - height/2) + 'px';
+        touchTile.style.width = ''+width+'px';
+        touchTile.style.height = ''+height+'px';
+        touchTile.textContent = draggedTile.textContent;
+        touchTile.style.zIndex = '10';
+    }
+    else
+    {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', e.target.innerHTML);
+    }
 }
 
 /**
@@ -333,9 +370,9 @@ function handleDragEnd(e) {
  */
 function handleDragOver(e) {
     if (!draggedTile) return;
-
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+
+    if(e.dataTransfer) e.dataTransfer.dropEffect = 'move';
 
     if (e.target.classList.contains('grid-square')) { //grid square
         const squareNum = parseInt(e.target.id.split('-')[1]);
@@ -345,6 +382,46 @@ function handleDragOver(e) {
     } else if (e.target.closest('.game-board-container')) { //background
         e.target.classList.add('drag-over');
     }
+}
+
+/**
+* drag move (touchscreen)
+*/
+function handleTouchMove(e) {
+    if (!draggedTile) return;
+    e.preventDefault();
+
+    const touch = e.touches[0];
+    const square = document.getElementById('square-0');
+    const computedStyle = window.getComputedStyle(square);
+    const width = Math.floor(parseFloat(computedStyle.width))-4;
+    const height = Math.floor(parseFloat(computedStyle.height))-4;
+
+    // Move the tile to follow the touch
+    touchTile.style.position = 'fixed';
+    touchTile.style.left = ''+Math.floor(touch.clientX - width/2) + 'px';
+    touchTile.style.top = ''+Math.floor(touch.clientY - height/2) + 'px';
+    touchTile.style.width = ''+width+'px';
+    touchTile.style.height = ''+height+'px';
+
+    // Find element under touch point
+    touchTile.style.pointerEvents = 'none';
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    touchTile.style.pointerEvents = 'auto';
+
+    // Remove previous highlights
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+
+    // Add highlight to valid drop targets
+    if (element && element.id.startsWith('square-')) {
+        const squareNum = parseInt(element.id.split('-')[1]);
+        if (!BLACK_SQUARES.includes(squareNum)) {
+            element.classList.add('drag-over');
+        }
+    } else if (element && element.closest('.game-board-container')) {
+        element.closest('.game-board-container').classList.add('drag-over');
+    }
+
 }
 
 /**
@@ -374,17 +451,23 @@ function handleDrop(e) {
     //can't drop on another tile; return to rack
     if(e.target.id.split('-')[0]==="tile") return;
 
-    //can't drop on a black square; return to rack
-    if (BLACK_SQUARES.includes(squareNumber)) {
+    const tileIndex = parseInt(draggedTile.dataset.tileIndex);
+
+    //if dragging onto the same square, do nothing
+    if(boardState[squareNumber] == tileIndex)
+    {
+        draggedTile = null;
+        return;
+    }
+
+    //can't drop on a black square or an occupied square; return to rack
+    if (BLACK_SQUARES.includes(squareNumber) || boardState[squareNumber]) {
         returnTileToRack(draggedTile);
         checkBoard();
         return;
     }
     
     //drop tile on grid
-    const tileIndex = parseInt(draggedTile.dataset.tileIndex);
-    const letter = gameData[6][tileIndex];
-
     //delete tile from old position in board state, if any
     for (let sq in boardState) {
         const tile = document.getElementById(`square-${sq}`).querySelector(`#tile-${tileIndex}`);
@@ -401,12 +484,82 @@ function handleDrop(e) {
     draggedTile.style.position = 'absolute';
     draggedTile.style.top = '4';
     draggedTile.style.left = '4';
-
     //increment moves
     moves++;
     //check words
     checkBoard();
 }
+
+/**
+* drag end (touchscreen)
+*/
+function handleTouchEnd(e) {
+    if (!draggedTile) return;
+
+    const touch = e.changedTouches[0];
+
+    // Find where the tile was dropped
+    touchTile.style.pointerEvents = 'none';
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    touchTile.style.pointerEvents = 'auto';
+    draggedTile.style.opacity = '1';
+    // Remove all highlights
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+
+    // Reset tile visual state
+    touchTile.style.visibility='hidden';
+    // Handle drop
+    //if dropping on itself, do nothing
+    if(element == draggedTile)
+    {
+        draggedTile = null;
+        return;
+    }
+    if (element && element.id.startsWith('square-')) {
+        const squareNumber = parseInt(element.id.split('-')[1]);
+        const tileIndex = parseInt(draggedTile.dataset.tileIndex);
+        //if dragging onto the same square, do nothing
+        if(boardState[squareNumber] == tileIndex)
+        {
+            draggedTile = null;
+            return;
+        }
+       //can't drop on a black square or occupied square; return to rack
+        if (BLACK_SQUARES.includes(squareNumber)||boardState[squareNumber]) {
+            returnTileToRack(draggedTile);
+            checkBoard();
+            return;
+        }
+        else
+        {
+            const letter = gameData[6][tileIndex];
+
+            // Remove from old position
+            for (let sq in boardState) {
+                const tile = document.getElementById(`square-${sq}`).querySelector(`#tile-${tileIndex}`);
+                if (tile) {
+                    delete boardState[sq];
+                }
+            }
+
+            // Add to new position
+            boardState[squareNumber] = tileIndex;
+            const square = document.getElementById(`square-${squareNumber}`);
+            square.appendChild(draggedTile);
+            draggedTile.style.position = 'absolute';
+            draggedTile.style.top = '0px';
+            draggedTile.style.left = '0px';
+            moves++;
+        }
+    } else {
+        returnTileToRack(draggedTile);
+    }
+
+    draggedTile = null;
+    checkBoard();
+}
+
+
 
 /**
  * drop on background (outside grid); return to rack
