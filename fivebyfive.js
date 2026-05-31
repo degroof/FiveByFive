@@ -127,6 +127,8 @@ function initializeGame() {
         restoreBoardState();
         checkBoard();
     }
+    showHints();
+
 }
 
 /**
@@ -149,6 +151,15 @@ function renderGrid() {
             square.addEventListener('dragleave', handleDragLeave);
             square.addEventListener('touchmove', handleDragOver);
             square.addEventListener('touchend', handleDrop);
+
+            const hintLabel = document.createElement('div');
+            hintLabel.className = 'hint-letter';
+            const hintIndex = EXPECTED[i];
+            hintLabel.id = `hint-label-${i}`;
+            const word = gameData[hintIndex[0]];
+            hintLabel.textContent = " ";
+
+            square.appendChild(hintLabel);
         }
         
         gameGrid.appendChild(square);
@@ -739,25 +750,15 @@ function handleCheckMouseUp(e) {
 function handleHintMouseDown(e) {
     e.preventDefault();
     if (!['new', 'in progress'].includes(gameStatus)) return;
+    if(hints<3)hints++;
+    showHints();
+    saveGameState();
 
-    hintActive = true;
-    squareColors = [];
-    for(let i=0;i<25;i++)
-    {
-        squareColors.push(getTileColor(i));
-        setTileColor(i,'white');
-    }
-    //backup current board state
-    hintBackupState = JSON.parse(JSON.stringify(boardState));
-    clearBoard();
+}
 
-    if(hints<3) hints++; //increment number of hints
-    let usedTiles=[]; //list of tiles already placed
-    let revealedSquares=[]; //list of squares to fill
-    boardState = {}; //reset board state
-
-    clearBoard();
-
+function showHints()
+{
+    let revealedSquares=[];
     if(hints>=1) revealedSquares.push(12); //center square
     if(hints>=2)
     {
@@ -773,38 +774,21 @@ function handleHintMouseDown(e) {
         revealedSquares.push(20);
         revealedSquares.push(24);
     }
-    let letters = gameData[6]; //list of available letters
+
     let rowText = gameData[0]+"     "+gameData[1]+"     "+gameData[2];
 
     for(const square of revealedSquares)
     {
         let targetLetter = rowText[square];
-        //get next available matching tile
-        let index = letters.split('').findIndex((char, i) => char === targetLetter && !usedTiles.includes(i));
-        usedTiles.push(index); //add to list of already used
-        boardState[square]=index; //update board state
+        document.getElementById(`hint-label-${square}`).textContent=targetLetter;
     }
-
-    restoreBoardState();
-
 }
 
 /**
- *"hint" button released - restore board state
+ *"hint" button released
  */
 function handleHintMouseUp(e) {
     e.preventDefault();
-    if (!hintActive) return;
-    hintActive = false;
-    clearBoard();
-    //restore backed up state
-    boardState = hintBackupState;
-    restoreBoardState();
-
-    for(let i=0;i<25;i++)
-    {
-        if(squareColors[i]!='') setTileColor(i,squareColors[i]);
-    }
 }
 
 /**
@@ -928,19 +912,32 @@ function handleShare() {
         emojis+=emoji;
         if(i%5==4) emojis+="\n";
     }
+    let url="https://degroof.github.io/fivebyfive.html";
+    const shareText = `#FiveByFive - Game #${gameNumber}\n${emojis}Words Found: ${wordsFound}\nMoves: ${moves}\nHints: ${hints}\nTime: ${formatSeconds(elapsed)}\n${url}`;
 
-    const shareText = `#FiveByFive - Game #${gameNumber}\n${emojis}Words Found: ${wordsFound}\nMoves: ${moves}\nHints: ${hints}\nTime: ${formatSeconds(elapsed)}\nhttps://degroof.github.io/fivebyfive.html`;
-    
-    navigator.clipboard.writeText(shareText).then(() => {
-		showToast("Results copied to clipboard.");
-    });
+    navigator.clipboard.writeText(shareText)
+        .then(() => {
+           showToast('Results copied to clipboard.');
+        })
+        .catch((err) => {
+           // Fallback for browsers that don't support clipboard API
+            console.error('Clipboard write failed:', err);
+            gameNumberEl.textContent='Clipboard write failed:'+ err;
+            showToast('Clipboard write failed:'+ err);
+        });
 }
 
 //pop up toast, saying results have been copied
-function showToast() {
+function showToast(txt) {
   const toast = document.getElementById("toast");
-  toast.className = "show";
-  setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+  toast.textContent=txt;
+  toast.classList.remove("show");
+  // Force reflow to restart animation
+  void toast.offsetWidth;
+  toast.classList.add("show");
+  setTimeout(() => {
+      toast.classList.remove("show");
+  }, 2000);
 }
 
 //format seconds into hh:mm:ss
@@ -971,7 +968,8 @@ function setupEventListeners() {
     });
     
     giveUpBtn.addEventListener('click', handleGiveUp);
-    shareBtn.addEventListener('click', handleShare);
+    shareBtn.addEventListener('mouseup', handleShare);
+    shareBtn.addEventListener('touchend', handleShare, { passive: false });
 
     //"hint" button press/release
     hintBtn.addEventListener('mousedown', handleHintMouseDown);
